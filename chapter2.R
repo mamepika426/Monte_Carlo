@@ -1,0 +1,148 @@
+library(plotly)
+#List2.1 一様乱数の生成
+set.seed(1)
+runif(3)
+set.seed(1)
+runif(3)
+set.seed(2)
+runif(3)
+
+#List2.2 コルモゴロフ・スミルノフ検定
+set.seed(1)
+u <- runif(1000)
+ks.test(u,punif)
+u
+
+RNGkind()
+
+#List2.4 RANDU法
+x <- numeric(1e2)
+y <- 1234
+
+n <- 2^31 -1
+a <- 65539
+b <- 0
+
+for(i in 1:length(x)){
+  y <- (a*y+b)%%n
+  x[i] <- y/n
+}
+
+x[1:3]
+ks.test(x,punif)
+
+#List2.5
+set.seed(1)
+lambda <- 2
+u <- runif(3)
+-(log(u))/lambda
+set.seed(1)
+rexp(3,rate=lambda)
+
+#List2.6 指数乱数の実行時間の比較
+install.packages("microbenchmark")
+library(microbenchmark)
+lambda <- 2
+n <- 1e5
+microbenchmark(A <- (log(runif(n)))/lambda,times=100)
+microbenchmark(B <- rexp(n,rate=lambda),times=100)
+
+#List2.7 コーシー乱数の生成法
+n <- 1e5
+microbenchmark(A <- tan(pi*(runif(n)-1/2)),times=100)
+microbenchmark(B <- rnorm(n)/rnorm(n),times=100)
+microbenchmark(C <- rcauchy(n),times=100)
+
+
+plot(0:10,dgeom(0:10,prob=0.2),type="h")
+plot(0:10,pgeom(0:10,prob=0.2),type="s")
+curve(pgeom(x,prob=0.2),-1,2,type="l",lwd=2,col=1)
+
+#List2.8 幾何乱数の生成法
+p <- 0.2
+n <- 5
+as.integer(log(runif(n))/log(1-p))
+rgeom(n,prob=p)
+microbenchmark(A<-as.integer(log(runif(n))/log(1-p)),times=100)
+microbenchmark(B <- rgeom(n,prob=p),times=100)
+
+#List2.4
+lambda <- 2
+
+rpoisf <- function(n,lambda){
+  c <- exp(-lambda)
+  res <- numeric(n)
+  
+  for(i in 1:n){
+    x <- 0
+    q <- c
+    F <- c
+    u <- runif(1)
+    while(F<u){
+      x <- x+1
+      F <- F + q*lambda/x
+      q <- q*lambda/x
+    }
+    res[i] <- x
+  }
+  return(res)
+  }
+n <- 1e5
+microbenchmark(A<-rpoisf(n,lambda),times=100)
+microbenchmark(B<-rpois(n,lambda),times=100)
+
+#List2.10 近似累積分布関数による乱数生成
+set.seed(1)
+m <- 3
+set.seed(1)
+rnorm(m)
+set.seed(1)
+qnorm(c(runif(2*m)[seq(from=1,to=2*m-1,by=2)]))
+
+#List2.11 変数変換法によるベータ分布の生成
+shape1 <- 2
+shape2 <- 3
+rbetar <- function(n,shape1,shape2){
+  x <- apply(-log(matrix(runif(n*shape1),ncol=n)),2,sum)
+  y <- apply(-log(matrix(runif(n,shape2),ncol=n)),2,sum)
+  x/x+y
+}
+
+rbetar(3,shape1,shape2)
+
+#List2.12 標準正規乱数の生成
+n <- 1e5
+RNGkind(normal.kind='default')A
+microbenchmark(A <- rnorm(n),times=100)
+
+RNGkind(normal.kind='Box-Muller')
+microbenchmark(B <- rnorm(n),times=100)
+
+#List 2.13 棄却法によるベータ乱数の生成
+alpha <- 2.5
+beta <- 3
+
+R <- ( (alpha-1)/(alpha+beta-2) )^(alpha-1)*( (beta-1)/(alpha+beta-2) )^(beta-1)/beta(alpha,beta)
+
+rbetar <- function(n){
+  z <- numeric(n)
+  for(i in 1:n){
+    u <- runif(1);y <- runif(1);
+    while(R*u > dbeta(y,shape1=alpha,shape2=beta)){
+      u <- runif(1);y<-runif(1);
+    }
+    z[i] <- y ## zに乱数格納
+  }
+  return(z)
+}
+
+rbetar(3)
+
+plot_ly(x=rbetar(1e4),type="histogram")
+
+alpha <- seq(1,10,length=100)
+beta <- seq(1,10,length=100)
+z <- ( (alpha-1)/(alpha+beta-2) )^(alpha-1)*( (beta-1)/(alpha+beta-2) )^(beta-1)/beta(alpha,beta)
+plot_ly(x=alpha,y=beta,z=z,type="contour")
+
+

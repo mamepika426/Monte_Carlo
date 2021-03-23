@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1616041940708.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "2BB6F481",
+    "lastKnownWriteTime" : 1616392068,
+    "last_content_update" : 1616394384782,
+    "path" : "~/Monte_Carlo/chapter2.R",
+    "project_path" : "chapter2.R",
+    "properties" : {
+        "cursorPosition" : "147,0",
+        "scrollLine" : "125",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
