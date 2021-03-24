@@ -138,11 +138,66 @@ rbetar <- function(n){
 
 rbetar(3)
 
-plot_ly(x=rbetar(1e4),type="histogram")
+#棄却法による乱数をbeta(2.5,3)と比較
+fig <- plot_ly(x=rbetar(1e4),type="histogram")
+x <- seq(0,1,length=100)
+y <- dbeta(x,shape1=alpha,shape2=beta)
+df <- data.frame(x=x,y=y)
+fig <- fig %>% add_trace(df,x=~x,y=~y,type="scatter",mode="l")
 
-alpha <- seq(1,10,length=100)
-beta <- seq(1,10,length=100)
+
+fig
+
+library(ggplot2)
+library(reshape2)
+x <- rbetar(1e4)
+
+qplot(x,geom="blank") +
+  geom_histogram(aes(y= ..density..),fill="dodgerblue",colour="black") + #aes(y=..density..)でヒストグラムをスケールダウン
+  stat_function(fun=dbeta,color="brown4",size=2,args=list(shape1=2.5,shape2=3))
+
+#採択されるまでの期待回数のヒートマップ
+
+##ggplot版
+alpha <- rep(1:10,10)
+beta <- rep(1:10,each=10)
+alpha
+beta
 z <- ( (alpha-1)/(alpha+beta-2) )^(alpha-1)*( (beta-1)/(alpha+beta-2) )^(beta-1)/beta(alpha,beta)
-plot_ly(x=alpha,y=beta,z=z,type="contour")
+z
+df <- data.frame(x = alpha,y = beta, value = z )
+df
+ggplot(df, aes(as.factor(x), y, group=y)) +
+  geom_tile(aes(fill = value)) + 
+  geom_text(aes(fill = df$value, label = round(df$value, 1))) +
+  scale_fill_gradient(low = "white", high = "red") 
+
+
+##plot_ly版
+plot_ly(x=alpha,y=beta,
+        z=( (alpha-1)/(alpha+beta-2) )^(alpha-1)*( (beta-1)/(alpha+beta-2) )^(beta-1)/beta(alpha,beta),
+        type="contour",
+        contours=list(start=0,end=5,size=0.5))
+
+#List 2.14
+n <- 1e5
+R <- sqrt(2*pi)*exp(-1/2)
+rnormr <- function(n){
+  z <- numeric(n)
+  for(i in 1:n){
+    u <- runif(1);y <- tan(pi*runif(1));
+    while(R*u>dunif(y)/dcauchy(y)){
+      u <- runif(1);y <- tan(pi*runif(1));
+    }
+    z[i] <- y
+  }
+  return(z)
+}
+d <- rnormr(n)
+
+qplot(d,geom="blank") +
+  geom_histogram(aes=(y= ..density..),fill="dodgeblue",colour="black")
+
+
 
 
