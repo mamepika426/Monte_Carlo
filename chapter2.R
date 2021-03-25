@@ -186,7 +186,7 @@ rnormr <- function(n){
   z <- numeric(n)
   for(i in 1:n){
     u <- runif(1);y <- tan(pi*runif(1));
-    while(R*u>dunif(y)/dcauchy(y)){
+    while(R*u>dnorm(y)/dcauchy(y)){
       u <- runif(1);y <- tan(pi*runif(1));
     }
     z[i] <- y
@@ -196,7 +196,118 @@ rnormr <- function(n){
 d <- rnormr(n)
 
 qplot(d,geom="blank") +
-  geom_histogram(aes=(y= ..density..),fill="dodgeblue",colour="black")
+  geom_histogram(aes(y=..density..),fill="dodgerblue",colour="black")+
+  stat_function(fun=dnorm,color="brown4",size=2,args=list(mean=0,sd=1))
+
+#List 2.15
+dgammar <- function(n,nu){
+  if(nu==1){
+    return(-log(runif(n)))
+  }
+  else if(nu==as.integer(nu)){
+    return(apply(matrix(-log(runif(n*nu),ncol=nu)),1,sum))
+  }
+  else{
+    inu <- as.integer(nu)
+    R <- 2^(inu)*(2*(nu-inu))^(nu-inu)*exp(-(nu-inu))
+    z <- numeric(n)
+    for(i in 1:n){
+      u <- runif(1);y <- 2*sum(-log(runif(inu)));
+      while(R*u>2^(inu)*y-(nu-inu)*exp(-y/2)){
+        u <- unif(1);y <- 2*sum(-log(runif(inu)));
+      }
+      z[i] <- y
+    }
+    return(z)
+  }
+}
+nu <- 5.2
+dgammar(3,nu)
+
+###練習問題###
+#2.1
+z <- runif(1000)
+x <- z[seq(1,length(z),by=2)]
+y <- z[seq(2,length(z),by=2)]
+df <- data.frame(x=x,y=y)
+
+ggplot(data=df,mapping=aes(x=x,y=y))+
+  geom_point()
+
+#2.2
+a <- 13
+b <- 0
+n <- 67
+y <- 1234
+
+z <- numeric(1000)
+for(i in 1:1000){
+  y <- (a*y+b)%%n
+  z[i] <- y/n
+}
+z
+x <- z[seq(1,length(z),by=2)]
+y <- z[seq(2,length(z),by=2)]
+df <- data.frame(x=x,y=y)
+
+ggplot(data=df,mapping=aes(x=x,y=y))+
+  geom_point()
+
+#2.3
+n <- 1e5
+f <- function(u){return(log(u)-log(1-u))}
+logisr <- function(n){
+  z <- numeric(n)
+  x <- runif(n)
+  for(i in 1:n){
+    z[i] <- log(x[i])-log(1-x[i])
+  }
+  return(z)
+}
+
+logis_gen <- logisr(n)
+
+microbenchmark(A <- f(runif(n)),times=100)
+microbenchmark(B <- rlogis(n),times=100)
+
+#2.4
+n <- 1e5
+a <- 2
+b <- 1
+paretor <- function(n){
+  z <- numeric(n)
+  rand <- runif(n)
+  for(i in 1:n){
+    z[i] <- b/(rand[i])^(1/a)
+  }
+  return(z)
+}
+f <- function(x) a*b^a/(x^(a+1))
+pareto_gen <- paretor(n)
+qplot(pareto_gen,geom="blank")+
+  geom_histogram(aes(y=..density..),fill="dodgerblue",colour="black",binwidth = 0.1)+
+  theme_bw()+xlim(1,4)+stat_function(fun=f)
+
+#2.5
+n <- 1e5
+sigma <- 2
+f <- function(x){return(x/(sigma^2)*exp(-x^2/(2*sigma^2)))}
+rayleighr <- function(n){
+  z <- numeric(n)
+  x <- runif(n)
+  for(i in 1:n){
+    z[i] <- sqrt(-2*(sigma^2)*log(x[i]))
+  }
+  return(z)
+}
+
+rayleigh_gen <- rayleighr(n)
+qplot(rayleigh_gen,geom="blank")+
+  geom_histogram(aes(y=..density..),fill="dodgerblue",colour="black")+
+  stat_function(fun=f)
+
+#List2.6
+
 
 
 
