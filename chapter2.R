@@ -307,8 +307,70 @@ qplot(rayleigh_gen,geom="blank")+
   stat_function(fun=f)
 
 #List2.6
+n <- 1e5
+a <- 2
+b <- 2
+fun_weibull <- function(x){
+  return((a/b^a)*x^(a-1)*exp(-(x/b)^a))
+}
+
+weibullr <- function(n,a,b){
+  z <- numeric(n)
+  rand <- runif(n)
+  for(i in 1:n){
+    z[i] <- b*(-log(rand[i]))^(1/a)
+  }
+  return(z)
+}
+weibull_gen <- weibullr(n,a,b)
+weibull_gen
+qplot(weibull_gen,geom="blank")+
+  geom_histogram(aes(y=..density..),fill="dodgerblue",colour="black")+
+  stat_function(fun=fun_weibull)
 
 
+#List2.7
+N <- 10
+theta <- 0.6
+###模範回答
+F_seq <- cumsum(dbinom(0:N,N,theta))
+f <- Vectorize(function(x) sum(x > F_seq))
+##この関数はなにをしている?
+## runif(1e4)の各要素について、F_seqを超えるか11回判定してsumして表示
 
+data.fr <- data.frame(x=f(runif(1e4)))
+ggplot(data.fr, aes(x))+geom_bar(aes(y=..prop..), alpha=0.5)+theme_bw()+
+  stat_function(geom="point", fun=dbinom, args=list(size=N, prob=theta), n=11)
 
+###　愚直な実装
+n <- 1e4
+binomr <- function(n){
+  z <- numeric(n)
+  rand <- runif(n)
+  for(i in 1:n){
+    cum <- dbinom(0,N,theta)
+    x <- 0
+    while(rand[i]>cum){
+      x = x+1
+      cum = cum + dbinom(x,N,theta)
+    }
+    z[i] <- x
+  }
+  return(z)
+}
+
+x <- c(0:10)
+y <- dbinom(x,N,theta)
+sum(y)
+df <- data.frame(x=x,y=y)
+
+binom_gen <- binomr(n)
+binom_gen
+qplot(binom_gen,geom="blank")+
+  geom_bar(aes(y=..prop..),fill="dodgerblue",colour="black")+
+  geom_point(data=df,aes(x=x,y=y))
+
+  stat_function(geom="point",fun=dbinom,args=list(size=N,prob=theta),n=11)
+
+  rgamma()
 
